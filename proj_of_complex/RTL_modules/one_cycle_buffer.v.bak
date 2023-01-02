@@ -1,0 +1,15 @@
+`timescale 1ns / 1ps
+
+
+module one_cycle_buffer
+	#(parameter p = 22)(
+    input wire [3+p-1:0] i_data, // 3Qp
+    input clk,
+    output reg [3+p-1:0] o_data
+    );
+    
+    always @ (posedge clk) begin
+        o_data <= i_data;
+    end
+    
+endmodule
