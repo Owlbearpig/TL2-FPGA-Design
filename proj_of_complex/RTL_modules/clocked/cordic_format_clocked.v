@@ -2,14 +2,14 @@
 
 
 module cordic_format_clocked
-	#(parameter pd = 8, parameter p = 22)(
+	#(parameter pd = 4, parameter p = 9)(
     input wire signed [pd+p-1:0] x, // pdQp
     input wire clk,
-	output wire signed [4+p-1:0] s_out // 4Qp
+	output wire signed [pd+p-1:0] s_out // 4Qp
     );
 	
 	reg signed [pd+p-1:0] x_r_0, x_r_1;
-	reg signed [4+p-1:0] s, ss; // 4Qp
+	reg signed [pd+p-1:0] s, ss; // 4Qp
     reg signed [2*pd+2*p-1:0] r, m; // (2*pd)Q(2*p)
 	reg signed [pd+p-1:0] n, m_p; // pdQp
 	wire signed [pd+p-1:0] r_int; // pdQp
@@ -21,9 +21,9 @@ module cordic_format_clocked
 	assign pi2 = 30'b00000110_0100100001111110110101; // 2pi 8Q22
 	assign pi2_inv = 30'b00000000_0010100010111110011000; // 1/(2pi) 8Q22
 	
-	assign pi_p = pi[30-1:(30-8)-p];
-	assign pi2_p = pi2[30-1:(30-8)-p];
-	assign pi2_inv_p = pi2_inv[30-1:(30-8)-p];
+	assign pi_p = pi[30-1:(30-pd)-p];
+	assign pi2_p = pi2[30-1:(30-pd)-p];
+	assign pi2_inv_p = pi2_inv[30-1:(30-pd)-p];
 	
 	/*
 	integer file;
@@ -53,15 +53,36 @@ module cordic_format_clocked
 	*/
 	assign r_int = {{r[2*p+:pd]}, {p{1'b0}}}; // pdQp
 	
-	always @(posedge clk) begin
-	    x_r_0 <= x;
-	    x_r_1 <= x_r_0;
-		r <= x * pi2_inv_p; // (2*pd)Q(2*p)
-		m <= pi2_p * r_int; // (2*pd)Q(2*p)
+	wire signed [3+pd+p-1:0] x_long;
+	assign x_long = {{3{1'b0}}, x};
 	
-		s <= x - m[pd+2*p:p]; // 4Qp
-		ss <= s - pi2_p;
+	wire signed [3+pd+p-1:0] x_long_shifted;
+	assign x_long_shifted = x_long << 3;
+	
+	wire signed [3+pd+p-1:0] x_long_shifted_int;
+	assign x_long_shifted_int = {x_long_shifted[pd+p:p], {p{1'b0}}};
+	
+	wire signed [pd+p-1:0] x_mod;
+	assign x_mod = x_long_shifted_int;
+	
+	
+	
+	always @(posedge clk) begin
+		m <= pi2_p * x_mod; // (2*pd)Q(2*p)
 	end
 	
-	assign s_out = (s > pi_p) ? ss : s;
+	assign m_p = m[pd+p:p];
+	assign s_out = m_p;
+	
+	/*
+	if m_p < 0
+		m_p = m_p + pi2;
+	
+	if m_p > pi
+		m_p = m_p - pi2
+	
+	assign s_out = (m_p > pi_p) ?  :
+				   (m_p[pd+p] == 1'b1) ? ()
+				   ;
+	*/
 endmodule

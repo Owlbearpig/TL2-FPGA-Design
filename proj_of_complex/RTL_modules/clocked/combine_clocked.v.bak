@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 
-module combine
+module combine_clocked
 	#(parameter p = 22)(
     input wire signed [3+p-1:0] i_s_0, i_c_0, i_s_1, i_c_1, i_s_2, i_c_2, i_s_3, i_c_3, //  3Qp
     //input wire clk,

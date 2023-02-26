@@ -1,12 +1,13 @@
 `timescale 1ns / 1ps
 
 module cos_clocked
-    #(parameter pd = 4, parameter p = 22)(
+    #(parameter pd = 4, parameter p = 9)(
     input wire signed [pd+p-1:0] i_s, // pdQp, range: -pi, pi -> pd=3 bit for int, 1 for overflow
-    //input wire clk,
-	output wire signed [3+p-1:0] o_c // 3Qp
+    input wire clk,
+	output reg signed [3+p-1:0] o_c_r // 3Qp
     );
     
+	wire signed [3+p-1:0] o_c; // 3Qp
     wire signed [pd+p-1:0] abs_p, x, m1_dw, y_dw, abs_y_dw, m2_dw, m3_dw, s, c; // pdQp
     wire signed [2*pd+2*p-1:0] y, m2, m1, m3;
 	
@@ -79,5 +80,11 @@ module cos_clocked
 	assign m3_dw = m3[pd+2*p:p]; // pdQp
 	
 	assign o_c = m3_dw + y_dw; // 3Qp
+	
+	always @(posedge clk) begin
+		o_c_r <= o_c;
+	end
+	
+	
 
 endmodule

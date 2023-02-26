@@ -1,17 +1,18 @@
 `timescale 1ns / 1ps
 
 
-module cordic_format
+module cordic_format_clocked
 	#(parameter pd = 8, parameter p = 22)(
     input wire signed [pd+p-1:0] x, // pdQp
     input wire clk,
 	output wire signed [4+p-1:0] s_out // 4Qp
     );
 	
+	reg signed [pd+p-1:0] x_r_0, x_r_1;
 	reg signed [4+p-1:0] s, ss; // 4Qp
     reg signed [2*pd+2*p-1:0] r, m; // (2*pd)Q(2*p)
-	reg signed [pd+p-1:0] r_int, n, m_p; // pdQp
-	
+	reg signed [pd+p-1:0] n, m_p; // pdQp
+	wire signed [pd+p-1:0] r_int; // pdQp
 	// constants, pi, 2*pi, 1/(2*pi)
     wire signed [30-1:0] pi, pi2, pi2_inv;
 	wire signed [pd+p-1:0] pi_p, pi2_p, pi2_inv_p;
@@ -50,13 +51,16 @@ module cordic_format
 			//log_cntr <= 8'b0;
 	end
 	*/
-	always @(posedge clk) begin
-		r = x * pi2_inv_p; // (2*pd)Q(2*p)
-		r_int = {{r[2*p+:pd]}, {p{1'b0}}}; // pdQp
-		m = pi2_p * r_int; // (2*pd)Q(2*p)
+	assign r_int = {{r[2*p+:pd]}, {p{1'b0}}}; // pdQp
 	
-		s = x - m[pd+2*p:p]; // 4Qp
-		ss = s - pi2_p;
+	always @(posedge clk) begin
+	    x_r_0 <= x;
+	    x_r_1 <= x_r_0;
+		r <= x * pi2_inv_p; // (2*pd)Q(2*p)
+		m <= pi2_p * r_int; // (2*pd)Q(2*p)
+	
+		s <= x - m[pd+2*p:p]; // 4Qp
+		ss <= s - pi2_p;
 	end
 	
 	assign s_out = (s > pi_p) ? ss : s;

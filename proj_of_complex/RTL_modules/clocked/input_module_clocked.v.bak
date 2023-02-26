@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 
-module input_module
+module input_module_clocked
 	#(parameter pd = 12, parameter p = 22)(
     input wire signed [pd+p-1:0] d0, d1, d2, // pdQp d in um
     input wire [2:0] cntr,

@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module cos
+module cos_clocked
     #(parameter pd = 4, parameter p = 22)(
     input wire signed [pd+p-1:0] i_s, // pdQp, range: -pi, pi -> pd=3 bit for int, 1 for overflow
     //input wire clk,

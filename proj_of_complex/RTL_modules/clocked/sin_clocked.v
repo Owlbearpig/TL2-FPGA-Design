@@ -3,10 +3,11 @@
 module sin_clocked
     #(parameter pd = 4, parameter p = 22)(
     input wire signed [pd+p-1:0] i_s, // pdQp, range: -pi, pi -> pd=3 bit for int, 1 for overflow
-	//input wire clk,
-    output wire signed [3+p-1:0] o_s // 3Qp
+	input wire clk,
+	output reg signed [3+p-1:0] o_s_r // 3Qp
     );
     
+	wire signed [3+p-1:0] o_s; // 3Qp
 	wire signed [pd+p-1:0] abs_p, m1_dw, y_dw, abs_y_dw, m2_dw, m3_dw; // pdQp	
 	wire signed [2*pd+2*p-1:0] y, m1, m2, m3;
 	
@@ -69,5 +70,9 @@ module sin_clocked
 	assign m3_dw = m3[pd+2*p:p]; // pdQp
 	
 	assign o_s = m3_dw + y_dw; // 3Qp
-
+	
+	always @(posedge clk) begin
+		o_s_r <= o_s;
+	end
+	
 endmodule

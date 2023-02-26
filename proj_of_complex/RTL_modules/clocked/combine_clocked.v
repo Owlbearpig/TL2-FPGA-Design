@@ -4,10 +4,12 @@
 module combine_clocked
 	#(parameter p = 22)(
     input wire signed [3+p-1:0] i_s_0, i_c_0, i_s_1, i_c_1, i_s_2, i_c_2, i_s_3, i_c_3, //  3Qp
-    //input wire clk,
-	output wire signed [3+p-1:0] o_r_enum_real, o_r_enum_imag, o_r_denum //  3Qp
+    input wire clk,
+	output reg signed [3+p-1:0] o_r_enum_real_r, o_r_enum_imag_r, o_r_denum_r //  3Qp
 	);
     
+	wire signed [3+p-1:0] o_r_enum_real, o_r_enum_imag, o_r_denum; //  3Qp
+	
     wire signed [25-1:0] c0, c1, c2, c3, c4, c5, c6, c7;
 	wire signed [3+p-1:0] c0_p, c1_p, c2_p, c3_p, c4_p, c5_p, c6_p, c7_p;
 	wire signed [2*3+2*p-1:0] m_12_r, m_22_r, m_12_i, m_22_i, r_enum_real, r_enum_imag, r_denum; // 6Q(2*p)
@@ -92,7 +94,12 @@ module combine_clocked
 	
 	assign o_r_enum_real = r_enum_real[3+2*p:p];
 	assign o_r_enum_imag = r_enum_imag[3+2*p:p];
-	
 	assign o_r_denum = r_denum[3+2*p:p];
+	
+	always @(posedge clk) begin
+		o_r_enum_real_r <= o_r_enum_real;
+		o_r_enum_imag_r <= o_r_enum_imag;
+		o_r_denum_r <= o_r_denum;
+	end
 	
 endmodule

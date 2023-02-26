@@ -2,15 +2,15 @@
 
 
 module input_module_clocked
-	#(parameter pd = 12, parameter p = 22)(
-    input wire signed [pd+p-1:0] d0, d1, d2, // pdQp d in um
+	#(parameter pd = 4, parameter p = 9)(
+    input wire signed [pd+p-1:0] d0, d1, d2, // pdQp
     input wire [2:0] cntr,
     input wire clk,
-	output wire signed [8+p-1:0] p0, p1, p2, p3 // 8Qp
+	output wire signed [4+p-1:0] p0, p1, p2, p3 // 8Qp
     );
     
     reg signed [pd+2*p-1:0] m0_r, m1_r, m2_r, m3_r; // pdQ(2*p)
-    wire signed [22-1:0] f, g;
+    wire signed [p-1:0] f, g;
 	wire signed [p-1:0] f_p, g_p;
 	
     /*
@@ -40,26 +40,26 @@ module input_module_clocked
 			//log_cntr <= 8'b0;
 	end
 	*/
-	
-	assign g = (cntr == 3'b001) ? 22'b0000011001001111010001 : // 0.024647137458149997 0Q22
-				(cntr == 3'b010) ? 22'b0000011111001111110111 : // 0.03051550351962 0Q22
-				(cntr == 3'b011) ? 22'b0000100111000011110101 : // 0.03814437939952 0Q22
-				(cntr == 3'b100) ? 22'b0000110000000100101101 : // 0.04694692849172 0Q22
-				(cntr == 3'b101) ? 22'b0000110011000101000000 : // 0.04988111152245 0Q22
-				(cntr == 3'b110) ? 22'b0000111001000101100110 : // 0.055749477583909995 0Q22
+
+	assign f = (cntr == 3'b001) ? 9'b000110110: // 0.10563059
+				(cntr == 3'b010) ? 9'b001000010: // 0.13078073
+				(cntr == 3'b011) ? 9'b001010011: // 0.16347591
+				(cntr == 3'b100) ? 9'b001100111: // 0.20120112
+				(cntr == 3'b101) ? 9'b001101101: // 0.21377619
+				(cntr == 3'b110) ? 9'b001111010: // 0.23892633
 				{p{1'b0}};
 				
-	assign f = (cntr == 3'b001) ? 22'b0000001101100001010100 : // 0.0132038236383 0Q22
-				(cntr == 3'b010) ? 22'b0000010000101111010110 : // 0.016347591171219998 0Q22
-				(cntr == 3'b011) ? 22'b0000010100111011001100 : // 0.02043448896403 0Q22
-				(cntr == 3'b100) ? 22'b0000011001110000001111 : // 0.02515014026342 0Q22
-				(cntr == 3'b101) ? 22'b0000011011010111010000 : // 0.02672202402988 0Q22
-				(cntr == 3'b110) ? 22'b0000011110100101010010 : // 0.02986579156281 0Q22
+	assign g = (cntr == 3'b001) ? 9'b001100100: // 0.1971771
+				(cntr == 3'b010) ? 9'b001111100: // 0.24412403
+				(cntr == 3'b011) ? 9'b010011100: // 0.30515504
+				(cntr == 3'b100) ? 9'b011000000: // 0.37557543
+				(cntr == 3'b101) ? 9'b011001100: // 0.39904889
+				(cntr == 3'b110) ? 9'b011100100: // 0.44599582
 				{p{1'b0}};
 
 	
-	assign g_p = g[22-1:22-p];
-	assign f_p = f[22-1:22-p];
+	assign g_p = g[p-1:p-p];
+	assign f_p = f[p-1:p-p];
 	
 	always @(posedge clk) begin
 		m0_r <= f_p * (d2 + d0) + g_p * d1;
@@ -68,9 +68,9 @@ module input_module_clocked
 		m3_r <= - f_p * (d2 + d0) + g_p * d1;
 	end
 	
-	assign p0 = m0_r[8+2*p:p]; // out should be 8Qp
-	assign p1 = m1_r[8+2*p:p];
-	assign p2 = m2_r[8+2*p:p];
-	assign p3 = m3_r[8+2*p:p];
+	assign p0 = m0_r[pd+2*p-1:p]; // out should be pdQp
+	assign p1 = m1_r[pd+2*p-1:p];
+	assign p2 = m2_r[pd+2*p-1:p];
+	assign p3 = m3_r[pd+2*p-1:p];
     
 endmodule
